@@ -261,16 +261,6 @@ qboolean GetChaseTarget(edict_t *ent, chase_mode_t mode)
         switch (mode) {
         case CHASE_NONE:
             goto found;
-        case CHASE_QUAD:
-            if (other->client->quad_framenum > level.framenum) {
-                goto found;
-            }
-            break;
-        case CHASE_INVU:
-            if (other->client->invincible_framenum > level.framenum) {
-                goto found;
-            }
-            break;
         default:
             break;
         }

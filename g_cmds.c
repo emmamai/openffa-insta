@@ -965,12 +965,7 @@ static void Cmd_Chase_f(edict_t *ent)
     if (gi.argc() == 2) {
         char *who = gi.argv(1);
 
-        if (!Q_stricmp(who, "quad")) {
-            mode = CHASE_QUAD;
-        } else if (!Q_stricmp(who, "inv") ||
-                   !Q_stricmp(who, "pent")) {
-            mode = CHASE_INVU;
-        } else if (!Q_stricmp(who, "top") ||
+        if (!Q_stricmp(who, "top") ||
                    !Q_stricmp(who, "topfragger") ||
                    !Q_stricmp(who, "leader")) {
             mode = CHASE_LEADER;
@@ -1329,7 +1324,7 @@ static void Cmd_AdminCommands_f(edict_t *ent)
 static void Cmd_Commands_f(edict_t *ent)
 {
     gi.cprintf(ent, PRINT_HIGH,
-               "menu       Show OpenFFA menu\n"
+               "menu       Show OpenFFA-Insta menu\n"
                "join       Enter the game\n"
                "observe    Leave the game\n"
                "chase      Enter chasecam mode\n"
@@ -1405,18 +1400,6 @@ static void select_test(edict_t *ent)
             PMenu_Close(ent);
         }
         break;
-    case 8:
-        if (become_spectator(ent)) {
-            GetChaseTarget(ent, CHASE_QUAD);
-            PMenu_Close(ent);
-        }
-        break;
-    case 9:
-        if (become_spectator(ent)) {
-            GetChaseTarget(ent, CHASE_INVU);
-            PMenu_Close(ent);
-        }
-        break;
     case 11:
         PMenu_Close(ent);
         break;
@@ -1424,7 +1407,7 @@ static void select_test(edict_t *ent)
 }
 
 static const pmenu_entry_t main_menu[MAX_MENU_ENTRIES] = {
-    { "OpenFFA - Main", PMENU_ALIGN_CENTER },
+    { "OpenFFA-Insta - Main", PMENU_ALIGN_CENTER },
     { NULL },
     { NULL },
     { NULL, PMENU_ALIGN_LEFT, select_test },
@@ -1432,8 +1415,6 @@ static const pmenu_entry_t main_menu[MAX_MENU_ENTRIES] = {
     { "*Enter freefloat mode", PMENU_ALIGN_LEFT, select_test },
     { "*Enter chasecam mode", PMENU_ALIGN_LEFT, select_test },
     { "*Autocam - Frag Leader", PMENU_ALIGN_LEFT, select_test },
-    { "*Autocam - Quad Runner", PMENU_ALIGN_LEFT, select_test },
-    { "*Autocam - Pent Runner", PMENU_ALIGN_LEFT, select_test },
     { NULL },
     { "*Exit menu", PMENU_ALIGN_LEFT, select_test },
 //  { "*Voting menu", PMENU_ALIGN_LEFT, select_test },

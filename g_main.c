@@ -657,10 +657,6 @@ static void CheckDMRules(void)
     int         i;
     gclient_t   *c;
 
-    if (g_item_ban->modified) {
-        G_UpdateItemBans();
-    }
-
     if (g_vote_treshold->modified) {
         G_CheckVote();
         g_vote_treshold->modified = qfalse;

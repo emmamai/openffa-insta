@@ -148,13 +148,6 @@ void SetRespawn(edict_t *ent, float delay)
     gi.linkentity(ent);
 }
 
-static void SetUnhide(edict_t *ent)
-{
-    ent->flags &= ~FL_HIDDEN;
-    ent->nextthink = level.framenum + 2 * HZ;
-    ent->think = DoRespawn;
-}
-
 //======================================================================
 
 qboolean Pickup_Powerup(edict_t *ent, edict_t *other)
@@ -308,8 +301,6 @@ void Use_Quad(edict_t *ent, gitem_t *item)
     else
         ent->client->quad_framenum = level.framenum + timeout;
 
-    UpdateChaseTargets(CHASE_QUAD, ent);
-
     gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM, 0);
 }
 
@@ -354,8 +345,6 @@ void Use_Invulnerability(edict_t *ent, gitem_t *item)
         ent->client->invincible_framenum += 30 * HZ;
     else
         ent->client->invincible_framenum = level.framenum + 30 * HZ;
-
-    UpdateChaseTargets(CHASE_INVU, ent);
 
     gi.sound(ent, CHAN_ITEM, gi.soundindex("items/protect.wav"), 1, ATTN_NORM, 0);
 }
@@ -437,7 +426,7 @@ qboolean Pickup_Ammo(edict_t *ent, edict_t *other)
         return qfalse;
 
     if (weapon && !oldcount) {
-        if (other->client->weapon != ent->item && (other->client->weapon == FindItem("blaster")))
+        if (other->client->weapon != ent->item && (other->client->weapon == FindItem("railgun")))
             other->client->newweapon = ent->item;
     }
 
@@ -1008,29 +997,9 @@ void SpawnItem(edict_t *ent, gitem_t *item)
     }
 
     // some items will be prevented in deathmatch
-    if (DF(NO_ARMOR)) {
-        if (item->pickup == Pickup_Armor || item->pickup == Pickup_PowerArmor) {
-            G_FreeEdict(ent);
-            return;
-        }
-    }
-    if (DF(NO_ITEMS)) {
-        if (item->pickup == Pickup_Powerup) {
-            G_FreeEdict(ent);
-            return;
-        }
-    }
-    if (DF(NO_HEALTH)) {
-        if (item->pickup == Pickup_Health || item->pickup == Pickup_Adrenaline || item->pickup == Pickup_AncientHead) {
-            G_FreeEdict(ent);
-            return;
-        }
-    }
-    if (DF(INFINITE_AMMO)) {
-        if ((item->flags == IT_AMMO) || (strcmp(ent->classname, "weapon_bfg") == 0)) {
-            G_FreeEdict(ent);
-            return;
-        }
+    if (item->flags != IT_KEY) {
+        G_FreeEdict( ent );
+        return;
     }
 
     ent->item = item;
@@ -1062,32 +1031,6 @@ static qboolean ItemBanned(edict_t *ent)
     }
 
     return qfalse;
-}
-
-void G_UpdateItemBans(void)
-{
-    int i;
-    edict_t *ent;
-
-    for (i = game.maxclients + BODY_QUEUE_SIZE + 1; i < globals.num_edicts; i++) {
-        ent = &g_edicts[i];
-        if (!ent->inuse || !ent->item) {
-            continue;
-        }
-        if ((ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM))) {
-            continue;
-        }
-        if (ItemBanned(ent)) {
-            if (!(ent->flags & FL_HIDDEN) && !(ent->svflags & SVF_NOCLIENT)) {
-                // give teammates a chance to respawn
-                SetRespawn(ent, 2);
-            }
-        } else if (ent->flags & FL_HIDDEN) {
-            SetUnhide(ent);
-        }
-    }
-
-    g_item_ban->modified = qfalse;
 }
 
 
@@ -1468,8 +1411,8 @@ const gitem_t   g_itemlist[ITEM_TOTAL] = {
         /* icon */      "w_railgun",
         /* pickup */    "Railgun",
         0,
-        1,
-        "Slugs",
+        0,
+        NULL,
         IT_WEAPON,
         WEAP_RAILGUN,
         NULL,

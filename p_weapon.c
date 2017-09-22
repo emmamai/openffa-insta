@@ -236,7 +236,7 @@ void Use_Weapon(edict_t *ent, gitem_t *item)
 {
     int         ammo_index;
     gitem_t     *ammo_item;
-
+    
     // see if we're already using it
     if (item == ent->client->weapon)
         return;
@@ -269,8 +269,8 @@ Drop_Weapon
 */
 void Drop_Weapon(edict_t *ent, gitem_t *item)
 {
-    int     index;
-
+    /*int     index;
+    
     if (DF(WEAPONS_STAY))
         return;
 
@@ -282,7 +282,8 @@ void Drop_Weapon(edict_t *ent, gitem_t *item)
     }
 
     Drop_Item(ent, item);
-    ent->client->inventory[index]--;
+    ent->client->inventory[index]--;*/
+    return;
 }
 
 
@@ -1123,7 +1124,7 @@ static void weapon_railgun_fire(edict_t *ent)
     vec3_t      start;
     vec3_t      forward, right;
     vec3_t      offset;
-    int         damage = 100;
+    int         damage = 999;
     int         kick = 200;
 
     if (is_quad) {
@@ -1151,9 +1152,6 @@ static void weapon_railgun_fire(edict_t *ent)
     if (ent->client->silencer_shots) {
         ent->client->silencer_shots--;
     }
-
-    if (!DF(INFINITE_AMMO))
-        ent->client->inventory[ent->client->ammo_index]--;
 
     ent->client->resp.frags[FRAG_RAILGUN].atts++;
 }

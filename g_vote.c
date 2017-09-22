@@ -160,11 +160,6 @@ qboolean G_CheckVote(void)
             gi.cvar_set("fraglimit", va("%d", level.vote.value));
             game.settings_modified++;
             break;
-        case VOTE_ITEMS:
-            gi.bprintf(PRINT_HIGH, "Vote passed: new item config set.\n");
-            gi.cvar_set("g_item_ban", va("%d", level.vote.value));
-            game.settings_modified++;
-            break;
         case VOTE_KICK:
             gi.bprintf(PRINT_HIGH, "Vote passed.\n");
             gi.AddCommandString(va("kick %d\n", (int)(level.vote.victim - game.clients)));
@@ -177,14 +172,6 @@ qboolean G_CheckVote(void)
             gi.bprintf(PRINT_HIGH, "Vote passed: next map is %s.\n", level.vote.map);
             strcpy(level.nextmap, level.vote.map);
             BeginIntermission();
-            break;
-        case VOTE_WEAPONSTAY:
-            gi.bprintf(PRINT_HIGH, "Vote passed: weapon stay is now %sABLED.\n",
-                       level.vote.value ? "EN" : "DIS");
-            gi.cvar_set("dmflags", va("%d", level.vote.value ?
-                                      ((int)dmflags->value | DF_WEAPONS_STAY) :
-                                      ((int)dmflags->value & ~DF_WEAPONS_STAY)));
-            game.settings_modified++;
             break;
         case VOTE_PROTECTION:
             gi.bprintf(PRINT_HIGH, "Vote passed: respawn protection is now %sABLED.\n",
@@ -227,41 +214,6 @@ static void G_BuildProposal(char *buffer)
     case VOTE_FRAGLIMIT:
         sprintf(buffer, "fraglimit %d", level.vote.value);
         break;
-    case VOTE_ITEMS: {
-        int mask = (int)g_item_ban->value ^ level.vote.value;
-
-        //strcpy(buffer, "change item config: ");
-        buffer[0] = 0;
-        if (mask & ITB_QUAD) {
-            if (level.vote.value & ITB_QUAD) {
-                strcat(buffer, "-quad ");
-            } else {
-                strcat(buffer, "+quad ");
-            }
-        }
-        if (mask & ITB_INVUL) {
-            if (level.vote.value & ITB_INVUL) {
-                strcat(buffer, "-invul ");
-            } else {
-                strcat(buffer, "+invul ");
-            }
-        }
-        if (mask & ITB_BFG) {
-            if (level.vote.value & ITB_BFG) {
-                strcat(buffer, "-bfg ");
-            } else {
-                strcat(buffer, "+bfg ");
-            }
-        }
-        if (mask & ITB_PS) {
-            if (level.vote.value & ITB_PS) {
-                strcat(buffer, "-ps ");
-            } else {
-                strcat(buffer, "+ps ");
-            }
-        }
-    }
-    break;
     case VOTE_KICK:
         sprintf(buffer, "kick %s", level.vote.victim->pers.netname);
         break;
@@ -271,10 +223,7 @@ static void G_BuildProposal(char *buffer)
     case VOTE_MAP:
         sprintf(buffer, "map %s", level.vote.map);
         break;
-    case VOTE_WEAPONSTAY:
-        sprintf(buffer, "%sable weapon stay",
-                level.vote.value ? "en" : "dis");
-        break;
+
     case VOTE_PROTECTION:
         sprintf(buffer, "%sable respawn protection",
                 level.vote.value ? "en" : "dis");
@@ -365,54 +314,6 @@ static qboolean vote_fraglimit(edict_t *ent)
     return qtrue;
 }
 
-
-static qboolean vote_items(edict_t *ent)
-{
-    int i;
-    char *s;
-    int mask = g_item_ban->value;
-    int bit, c;
-
-    for (i = 2; i < gi.argc(); i++) {
-        s = gi.argv(i);
-
-        if (*s == '+' || *s == '-') {
-            c = *s++;
-        } else {
-            c = '+';
-        }
-
-        if (!strcmp(s, "all")) {
-            bit = ITB_QUAD | ITB_INVUL | ITB_BFG | ITB_PS;
-        } else if (!strcmp(s, "quad")) {
-            bit = ITB_QUAD;
-        } else if (!strcmp(s, "pent") || !strcmp(s, "invul") || !strcmp(s, "inv")) {
-            bit = ITB_INVUL;
-        } else if (!strcmp(s, "bfg") || !strcmp(s, "10k")) {
-            bit = ITB_BFG;
-        } else if (!strcmp(s, "powershield") || !strcmp(s, "shield") || !strcmp(s, "ps")) {
-            bit = ITB_PS;
-        } else {
-            gi.cprintf(ent, PRINT_HIGH, "Item %s is not known.\n", s);
-            return qfalse;
-        }
-
-        if (c == '-') {
-            mask |= bit;
-        } else {
-            mask &= ~bit;
-        }
-    }
-
-    if (mask == g_item_ban->value) {
-        gi.cprintf(ent, PRINT_HIGH, "This item config is already set.\n");
-        return qfalse;
-    }
-
-    level.vote.value = mask;
-    return qtrue;
-}
-
 static qboolean vote_victim(edict_t *ent)
 {
     edict_t *other = G_SetVictim(ent, 1);
@@ -472,11 +373,6 @@ static qboolean vote_toggle(edict_t *ent, const char *name, qboolean current)
     return qtrue;
 }
 
-static qboolean vote_weaponstay(edict_t *ent)
-{
-    return vote_toggle(ent, "Weapon stay", DF(WEAPONS_STAY));
-}
-
 static qboolean vote_protection(edict_t *ent)
 {
     return vote_toggle(ent, "Respawn protection", (g_protection_time->value > 0));
@@ -516,11 +412,9 @@ static const vote_proposal_t vote_proposals[] = {
     { "tl",         VOTE_TIMELIMIT,     vote_timelimit  },
     { "fraglimit",  VOTE_FRAGLIMIT,     vote_fraglimit  },
     { "fl",         VOTE_FRAGLIMIT,     vote_fraglimit  },
-    { "items",      VOTE_ITEMS,         vote_items      },
     { "kick",       VOTE_KICK,          vote_victim     },
     { "mute",       VOTE_MUTE,          vote_victim     },
     { "map",        VOTE_MAP,           vote_map        },
-    { "weaponstay", VOTE_WEAPONSTAY,    vote_weaponstay },
     { "protection", VOTE_PROTECTION,    vote_protection },
     { "telemode",   VOTE_TELEMODE,      vote_telemode   },
     { NULL }
@@ -576,10 +470,6 @@ void Cmd_Vote_f(edict_t *ent)
             gi.cprintf(ent, PRINT_HIGH,
                        " timelimit/tl <minutes>         Change time limit\n");
         }
-        if (mask & VOTE_ITEMS) {
-            gi.cprintf(ent, PRINT_HIGH,
-                       " items [+/-]<quad/invul/bfg/ps> Allow/disallow certain items\n");
-        }
         if (mask & VOTE_KICK) {
             gi.cprintf(ent, PRINT_HIGH,
                        " kick <player_id>               Kick player from the server\n");
@@ -591,10 +481,6 @@ void Cmd_Vote_f(edict_t *ent)
         if (mask & VOTE_MAP) {
             gi.cprintf(ent, PRINT_HIGH,
                        " map <name>                     Change current map\n");
-        }
-        if (mask & VOTE_WEAPONSTAY) {
-            gi.cprintf(ent, PRINT_HIGH,
-                       " weaponstay <0/1>               Toggle weapon stay\n");
         }
         if (mask & VOTE_PROTECTION) {
             gi.cprintf(ent, PRINT_HIGH,

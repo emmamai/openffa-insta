@@ -599,7 +599,6 @@ void G_SpawnEntities(const char *mapname, const char *entities, const char *spaw
 
     G_ParseString();
     G_FindTeams();
-    //G_UpdateItemBans();
 
     // find spawnpoints
     ent = NULL;
@@ -650,7 +649,6 @@ void G_ResetLevel(void)
     // respawn all edicts
     G_ParseString();
     G_FindTeams();
-    //G_UpdateItemBans();
 
     // respawn all clients
     for (i = 0; i < game.maxclients; i++) {
@@ -913,7 +911,7 @@ void SP_worldspawn(edict_t *ent)
     level.sounds.burn[1] = gi.soundindex("player/burn2.wav");
     level.sounds.drown = gi.soundindex("player/drown1.wav");
 
-    PrecacheItem(INDEX_ITEM(ITEM_BLASTER));
+    PrecacheItem(INDEX_ITEM(ITEM_RAILGUN));
 
     gi.soundindex("player/lava1.wav");
     gi.soundindex("player/lava2.wav");

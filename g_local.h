@@ -42,7 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
                      GMF_WANT_ALL_DISCONNECTS | G_GMF_VARIABLE_FPS)
 
 // the "gameversion" client command will print this plus compile date
-#define GAMEVERSION "OpenFFA"
+#define GAMEVERSION "OpenFFA-Insta"
 
 // protocol bytes that can be directly added to messages
 #define svc_muzzleflash     1
@@ -755,7 +755,6 @@ int ArmorIndex(edict_t *ent);
 int PowerArmorIndex(edict_t *ent);
 qboolean Add_Ammo(edict_t *ent, gitem_t *item, int count);
 void Touch_Item(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf);
-void G_UpdateItemBans(void);
 
 //
 // g_utils.c
@@ -985,8 +984,6 @@ typedef enum {
 typedef enum {
     CHASE_NONE,
     CHASE_LEADER,
-    CHASE_QUAD,
-    CHASE_INVU
 } chase_mode_t;
 
 typedef enum {

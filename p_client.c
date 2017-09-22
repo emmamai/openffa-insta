@@ -502,7 +502,7 @@ static void TossClientWeapon(edict_t *self)
     item = self->client->weapon;
     if (!self->client->inventory[self->client->ammo_index])
         item = NULL;
-    if (item == INDEX_ITEM(ITEM_BLASTER))
+    if (item == INDEX_ITEM(ITEM_RAILGUN))
         item = NULL;
 
     if (!DF(QUAD_DROP))
@@ -1159,9 +1159,9 @@ void PutClientInServer(edict_t *ent)
     client->edict = ent;
     client->clientNum = index;
 
-    client->selected_item = ITEM_BLASTER;
-    client->inventory[ITEM_BLASTER] = 1;
-    client->weapon = INDEX_ITEM(ITEM_BLASTER);
+    client->selected_item = ITEM_RAILGUN;
+    client->inventory[ITEM_RAILGUN] = 1;
+    client->weapon = INDEX_ITEM(ITEM_RAILGUN);
 
     client->max_bullets     = 200;
     client->max_shells      = 100;
